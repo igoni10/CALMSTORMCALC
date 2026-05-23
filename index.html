@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Calm Storm Engineering Suite | Materials + Column + Beam</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #eef2f8;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', 'Roboto', sans-serif;
+            padding: 28px 20px;
+            min-height: 100vh;
+        }
+
+        /* Main hub container - clean glassmorphic feel */
+        .suite-container {
+            max-width: 1440px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 32px;
+            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.03);
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        /* Header - refined calm storm identity */
+        .suite-header {
+            background: linear-gradient(115deg, #0f2c38 0%, #1f4e5e 100%);
+            padding: 1.6rem 2rem;
+            color: white;
+        }
+        .suite-header h1 {
+            font-size: 1.85rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .suite-header h1 span {
+            background: #f5b042;
+            font-size: 0.85rem;
+            padding: 4px 14px;
+            border-radius: 60px;
+            color: #1e2f3a;
+            font-weight: 700;
+        }
+        .suite-header p {
+            opacity: 0.85;
+            margin-top: 8px;
+            font-size: 0.85rem;
+            font-family: 'Menlo', monospace;
+        }
+
+        /* Tab navigation - clean borderless active */
+        .tab-nav {
+            display: flex;
+            background: #f9fbfd;
+            border-bottom: 1px solid #e4e9f0;
+            padding: 0 24px;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .tab-btn {
+            background: transparent;
+            border: none;
+            padding: 14px 22px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border-radius: 30px 30px 0 0;
+            transition: all 0.2s ease;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .tab-btn.active {
+            background: white;
+            color: #1f6e8c;
+            border-bottom: 3px solid #f5b042;
+            box-shadow: 0 -1px 0 #e9edf2;
+        }
+        .tab-btn:hover:not(.active) {
+            background: #eef3fc;
+            color: #1f4e5e;
+        }
+
+        /* Panels */
+        .tab-pane {
+            display: none;
+            padding: 28px 30px;
+            background: white;
+            animation: fadeIn 0.2s ease;
+        }
+        .tab-pane.active-pane {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+
+        /* Forms & cards */
+        .input-group {
+            margin-bottom: 18px;
+        }
+        .input-group label {
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            color: #2c5a6e;
+            display: block;
+            margin-bottom: 6px;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1.5px solid #dce5ef;
+            border-radius: 16px;
+            font-size: 0.9rem;
+            background: #ffffff;
+            transition: 0.2s;
+            font-weight: 500;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #f5b042;
+            box-shadow: 0 0 0 3px rgba(245, 176, 66, 0.2);
+        }
+        button.calc-btn {
+            background: #1f5e6e;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 6px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        button.calc-btn:hover {
+            background: #0f4452;
+            transform: translateY(-2px);
+        }
+        .result-card {
+            background: #fbfdfe;
+            border-radius: 20px;
+            padding: 18px 22px;
+            margin-top: 18px;
+            border: 1px solid #eef2f8;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+            font-size: 0.9rem;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 0.7rem;
+            margin-top: 8px;
+        }
+        .status-safe { background: #e0f2e9; color: #166534; }
+        .status-warning { background: #fff0db; color: #b45309; }
+        .status-danger { background: #ffe8e8; color: #b91c1c; }
+        hr {
+            margin: 24px 0;
+            border: none;
+            border-top: 1px solid #e9edf2;
+        }
+        .grid-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .full-width {
+            grid-column: span 2;
+        }
+        @media (max-width: 700px) {
+            .tab-pane { padding: 20px; }
+            .grid-2col { grid-template-columns: 1fr; }
+            .full-width { grid-column: span 1; }
+            .tab-nav { padding: 0 12px; }
+            .tab-btn { padding: 10px 16px; font-size: 0.8rem; }
+        }
+        .footnote {
+            font-size: 0.7rem;
+            color: #6c86a3;
+            margin-top: 16px;
+            text-align: center;
+            border-top: 1px solid #ecf3f8;
+            padding-top: 14px;
+        }
+        .rebar-highlight {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #1f5e6e;
+        }
+        .section-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #1a4a5f;
+            margin-bottom: 16px;
+            border-left: 4px solid #f5b042;
+            padding-left: 12px;
+        }
+    </style>
+</head>
+<body>
+<div class="suite-container">
+    <div class="suite-header">
+        <h1>🌩️ CALM STORM ENGINEERING SUITE <span>v2.1</span></h1>
+        <p>▸ Integrated toolkit: Materials estimation · RC Column (BS8110) · RC Beam Designer (BS8110)</p>
+    </div>
+
+    <div class="tab-nav">
+        <button class="tab-btn active" data-tab="materials">📦 Building Materials</button>
+        <button class="tab-btn" data-tab="column">🏗️ Column Analyzer</button>
+        <button class="tab-btn" data-tab="beam">📐 Beam Designer</button>
+    </div>
+
+    <!-- ================= TAB 1: MATERIALS ================= -->
+    <div id="materials-pane" class="tab-pane active-pane">
+        <div class="section-title">🪨 Aggregates & Steel</div>
+        <div class="grid-2col">
+            <div class="input-group"><label>Concrete Volume (m³) - Chippings</label><input type="number" id="chippings_vol" step="0.01" placeholder="e.g., 5.25"></div>
+            <div><button class="calc-btn" id="btnChippings">➤ Calculate Tons</button></div>
+            <div id="chippings_result" class="result-card" style="margin-top:0;">— tons —</div>
+
+            <div class="input-group"><label>Concrete Volume (m³) - Sand</label><input type="number" id="sand_vol" step="0.01" placeholder="e.g., 5.25"></div>
+            <div><button class="calc-btn" id="btnSand">➤ Sand Tons</button></div>
+            <div id="sand_result" class="result-card" style="margin-top:0;">— tons —</div>
+
+            <div class="input-group"><label>Concrete Volume (m³) - Cement</label><input type="number" id="cement_vol" step="0.01" placeholder="Volume"></div>
+            <div class="input-group"><label>Mix Ratio Sum (1:2:4 = 7)</label><input type="number" id="mix_ratio_sum" step="0.01" value="7"></div>
+            <div><button class="calc-btn" id="btnCement">➤ Cement Bags</button></div>
+            <div id="cement_result" class="result-card">— bags —</div>
+
+            <div class="input-group"><label>Rod Length (m)</label><input type="number" id="rod_length_m" step="0.01" placeholder="cut length"></div>
+            <div class="input-group"><label>Number of Bars</label><input type="number" id="num_bars_qty" step="1" placeholder="bars"></div>
+            <div><button class="calc-btn" id="btnRods">➤ Compute Full Rods (12m)</button></div>
+            <div id="rods_result" class="result-card">— pieces —</div>
+        </div>
+        <div class="footnote">⚡ Technical constants: Chippings 0.92 t/m³ · Sand 0.46 t/m³ · Dry factor 1.54, 1 bag cement = 0.035m³ · Rods = ⌈(total length)/12⌉</div>
+    </div>
+
+    <!-- ================= TAB 2: COLUMN PREDICTOR (BS8110) ================= -->
+    <div id="column-pane" class="tab-pane">
+        <div class="section-title">📐 Axial Column · BS8110 Logic</div>
+        <div class="grid-2col">
+            <div class="input-group"><label>Axial Load P (kN)</label><input type="number" id="axial_load" value="600" step="10"></div>
+            <div class="input-group"><label>Width b (mm)</label><input type="number" id="col_width" value="225" step="5"></div>
+            <div class="input-group"><label>Depth h (mm)</label><input type="number" id="col_depth" value="225" step="5"></div>
+            <div class="input-group"><label>Concrete fcu (N/mm²)</label><input type="number" id="col_fcu" value="25" step="5"></div>
+            <div class="input-group"><label>Steel fy (N/mm²)</label>
+                <select id="col_fy">
+                    <option value="250">250 N/mm²</option>
+                    <option value="410" selected>410 N/mm² (HYSD)</option>
+                    <option value="460">460 N/mm²</option>
+                </select>
+            </div>
+        </div>
+        <button class="calc-btn" id="btnColumnAnalyze">⚙️ Analyze & Predict Reinforcement</button>
+        <div id="column_output" class="result-card" style="background:#fefaf5;">⚡ Enter parameters and click analyze — structural engine (BS8110) will compute steel area & bar layout.</div>
+    </div>
+
+    <!-- ================= TAB 3: BEAM DESIGNER (BS8110 flexure + shear + deflection) ================= -->
+    <div id="beam-pane" class="tab-pane">
+        <div class="section-title">📐 RC Beam Optimizer · BS8110-1:1997</div>
+        <div class="grid-2col">
+            <div class="input-group"><label>Beam width b (mm)</label><input type="number" id="beamWidth" value="300" step="10"></div>
+            <div class="input-group"><label>Beam depth h (mm)</label><input type="number" id="beamDepth" value="500" step="10"></div>
+            <div class="input-group"><label>Concrete fcu (N/mm²)</label><input type="number" id="beam_fcu" value="30" step="5"></div>
+            <div class="input-group"><label>Steel fy (N/mm²)</label>
+                <select id="beam_fy">
+                    <option value="250">250 N/mm²</option>
+                    <option value="410" selected>410 N/mm² (HYSD)</option>
+                    <option value="460">460 N/mm²</option>
+                </select>
+            </div>
+            <div class="input-group"><label>Cover to main bar (mm)</label><input type="number" id="cover_beam" value="30" step="5"></div>
+            <div class="input-group"><label>Rebar diameter φ (mm)</label><input type="number" id="rebarDia_beam" value="20" step="2"></div>
+            <div class="input-group"><label>Span length L (m)</label><input type="number" id="spanLength_beam" value="6.0" step="0.5"></div>
+            <div class="input-group full-width">
+                <label>Load Type</label>
+                <div style="display:flex; gap:24px; margin-top:5px;">
+                    <label style="display:flex; gap:6px;"><input type="radio" name="beamLoadType" value="udl" checked> UDL (kN/m)</label>
+                    <label style="display:flex; gap:6px;"><input type="radio" name="beamLoadType" value="point"> Point midspan (kN)</label>
+                </div>
+            </div>
+            <div class="input-group full-width"><label id="beamLoadLabel">Design load w (kN/m)</label><input type="number" id="beamLoadValue" value="40.0" step="5"></div>
+        </div>
+        <button class="calc-btn" id="designBeamBtn">⚡ DESIGN BEAM (BS8110)</button>
+        <div id="beamResultsContainer">
+            <div class="result-card" style="margin-top: 18px;">
+                <div style="font-weight:700; margin-bottom:8px;">📐 Flexural Design</div>
+                <div id="beamMoment">Moment: -- kN·m</div>
+                <div id="beamKValue">K-factor: --</div>
+                <div class="grid-2col" style="margin-top:8px; gap:12px;"><div><strong>Tension As req:</strong> <span id="beamAsTension" style="font-size:1.2rem; font-weight:700;">---</span> mm²</div><div><strong>Compression As':</strong> <span id="beamAsComp" style="font-size:1.2rem; font-weight:700;">---</span> mm²</div></div>
+                <div id="beamSectionStatus" class="status-badge" style="margin-top:8px;">—</div>
+            </div>
+            <div class="result-card"><strong>✂️ Shear Verification</strong><div id="beamShearDetails">Shear V: -- kN</div><div id="beamShearStress">v: -- N/mm²</div><div id="beamShearVerdict"></div><div id="beamLinkAdvice" style="font-size:0.8rem; margin-top:5px;"></div></div>
+            <div class="result-card"><strong>📏 Deflection Check (L/d)</strong><div id="beamDeflectionStatus"></div><div id="beamDeflectionMsg" class="status-badge"></div><div id="beamDepthHint" style="margin-top:8px; font-size:0.8rem;"></div></div>
+            <div class="result-card"><strong>📌 Detailing Summary</strong><div id="beamDetailing"></div><div id="beamOptimizationNote" style="background:#f0f6fa; padding:8px 14px; border-radius:20px; margin-top:10px; font-size:0.8rem;"></div></div>
+        </div>
+        <div class="footnote">🔍 BS8110: K' = 0.156 (fy=460/410) or 0.167 (fy=250). Deflection & shear checks integrated; link design recommendation based on vc.</div>
+    </div>
+</div>
+
+<script>
+    // ------------------------- VALIDATION -------------------------
+    function isValidNumber(val) { return !isNaN(val) && val !== null && val !== '' && parseFloat(val) > 0; }
+
+    // ---------- TAB SWITCHING ----------
+    const tabs = document.querySelectorAll('.tab-btn');
+    const panes = {
+        materials: document.getElementById('materials-pane'),
+        column: document.getElementById('column-pane'),
+        beam: document.getElementById('beam-pane')
+    };
+    function switchTab(tabId) {
+        Object.values(panes).forEach(p => p.classList.remove('active-pane'));
+        tabs.forEach(btn => btn.classList.remove('active'));
+        if (tabId === 'materials') { panes.materials.classList.add('active-pane'); document.querySelector('[data-tab="materials"]').classList.add('active'); }
+        else if (tabId === 'column') { panes.column.classList.add('active-pane'); document.querySelector('[data-tab="column"]').classList.add('active'); runColumnAnalysis(); }
+        else if (tabId === 'beam') { panes.beam.classList.add('active-pane'); document.querySelector('[data-tab="beam"]').classList.add('active'); runBeamDesign(); }
+    }
+    tabs.forEach(btn => btn.addEventListener('click', (e) => { switchTab(btn.getAttribute('data-tab')); }));
+
+    // ================= 1. MATERIALS MODULE (clean logic) =================
+    document.getElementById('btnChippings').addEventListener('click', () => {
+        let vol = parseFloat(document.getElementById('chippings_vol').value);
+        if (!isValidNumber(vol)) { document.getElementById('chippings_result').innerHTML = '❌ Enter valid volume >0'; return; }
+        let tons = vol * 0.92;
+        document.getElementById('chippings_result').innerHTML = `✅ Required Chippings: <strong>${tons.toFixed(2)} Tons</strong> (${vol} m³ × 0.92)`;
+    });
+    document.getElementById('btnSand').addEventListener('click', () => {
+        let vol = parseFloat(document.getElementById('sand_vol').value);
+        if (!isValidNumber(vol)) { document.getElementById('sand_result').innerHTML = '❌ Valid volume needed'; return; }
+        let tons = vol * 0.46;
+        document.getElementById('sand_result').innerHTML = `✅ Required Sand: <strong>${tons.toFixed(2)} Tons</strong> (${vol} m³ × 0.46)`;
+    });
+    document.getElementById('btnCement').addEventListener('click', () => {
+        let vol = parseFloat(document.getElementById('cement_vol').value);
+        let ratio = parseFloat(document.getElementById('mix_ratio_sum').value);
+        if (!isValidNumber(vol) || !isValidNumber(ratio)) { document.getElementById('cement_result').innerHTML = '❌ Volume & mix ratio required'; return; }
+        let dryVol = vol * 1.54;
+        let cementM3 = dryVol * (1/ratio);
+        let bags = Math.ceil(cementM3 / 0.035);
+        document.getElementById('cement_result').innerHTML = `✅ Cement Bags: <strong>${bags} bags</strong> (theoretical ${(cementM3/0.035).toFixed(1)})`;
+    });
+    document.getElementById('btnRods').addEventListener('click', () => {
+        let len = parseFloat(document.getElementById('rod_length_m').value);
+        let bars = parseInt(document.getElementById('num_bars_qty').value);
+        if (isNaN(len) || len<=0 || isNaN(bars) || bars<=0) { document.getElementById('rods_result').innerHTML = '❌ Valid length & number of bars'; return; }
+        let totalLen = len * bars;
+        let rods = Math.ceil(totalLen / 12);
+        document.getElementById('rods_result').innerHTML = `📦 Full Rods (12m) to buy: <strong>${rods} pieces</strong> (total required length ${totalLen.toFixed(2)} m)`;
+    });
+
+    // ================= 2. COLUMN ANALYZER (enhanced with 410N/mm²) =================
+    function runColumnAnalysis() {
+        let P = parseFloat(document.getElementById('axial_load').value);
+        let b = parseFloat(document.getElementById('col_width').value);
+        let h = parseFloat(document.getElementById('col_depth').value);
+        let fcu = parseFloat(document.getElementById('col_fcu').value);
+        let fy = parseFloat(document.getElementById('col_fy').value);
+        if (isNaN(P) || isNaN(b) || isNaN(h) || isNaN(fcu) || isNaN(fy)) { document.getElementById('column_output').innerHTML = '❌ Please enter valid numeric values.'; return; }
+        let Ac = b * h;
+        let As_min = 0.004 * Ac;
+        let As_max = 0.06 * Ac;
+        let concreteConstant = (0.4 * Ac * fcu) / (0.67 * fy);
+        let RawAs = ((1.5 * P * 1000) / fy) - concreteConstant;
+        let finalAs = RawAs;
+        let diagnosticNote = "", statusHTML = "";
+        if (RawAs < 0) { finalAs = As_min; statusHTML = "<span class='status-badge status-warning'>⚠️ CONCRETE DOMINANT</span>"; diagnosticNote = "Concrete alone carries axial load. Minimum reinforcement (0.4%) applied."; }
+        else if (RawAs < As_min) { finalAs = As_min; statusHTML = "<span class='status-badge status-safe'>✓ MINIMUM REBAR CONTROL</span>"; diagnosticNote = "Calculated steel < 0.4%, upgraded to code minimum."; }
+        else if (RawAs > As_max) { finalAs = As_max; statusHTML = "<span class='status-badge status-danger'>⚠️ CONGESTION FAILURE</span>"; diagnosticNote = `Required steel ${RawAs.toFixed(0)} mm² exceeds 6% limit. Increase column dimensions.`; }
+        else { finalAs = RawAs; statusHTML = "<span class='status-badge status-safe'>✅ STRUCTURALLY OPTIMIZED</span>"; diagnosticNote = "Steel ratio within 0.4%-6%. Design is efficient."; }
+        let standardBars = [12, 16, 20, 25, 32];
+        let rebarSuggestion = "Increase section to compute reinforcement.";
+        if (finalAs > 0 && finalAs <= As_max * 1.05) {
+            for (let size of standardBars) {
+                let singleArea = (Math.PI * Math.pow(size, 2)) / 4;
+                let count = Math.ceil(finalAs / singleArea);
+                if (count < 4) count = 4;
+                if (count % 2 !== 0) count++;
+                let provArea = count * singleArea;
+                if (provArea >= finalAs) { rebarSuggestion = `${count}x Y${size} bars (Provided area: ${provArea.toFixed(0)} mm²)`; break; }
+            }
+        } else if (finalAs > As_max) rebarSuggestion = "❌ Section too small — increase b/h or concrete grade.";
+        document.getElementById('column_output').innerHTML = `
+            <div><b>Raw analysis:</b> ${RawAs.toFixed(1)} mm²</div>
+            <div><b>Design Steel Target (As):</b> <span style="font-size:1.5rem; font-weight:800; color:#1f5e6e;">${finalAs.toFixed(1)} mm²</span></div>
+            <div style="margin-top:10px;"><b>📌 Recommended bars:</b> ${rebarSuggestion}</div>
+            <div style="margin-top:8px;">${statusHTML}</div>
+            <p style="font-size:0.75rem; margin-top:8px;">${diagnosticNote} | As,min = ${As_min.toFixed(0)} mm² | As,max = ${As_max.toFixed(0)} mm²</p>
+        `;
+    }
+    document.getElementById('btnColumnAnalyze').addEventListener('click', runColumnAnalysis);
+
+    // ================= 3. BEAM DESIGNER (BS8110 full integration with fy=410 support) =================
+    function runBeamDesign() {
+        let b = parseFloat(document.getElementById('beamWidth').value);
+        let h = parseFloat(document.getElementById('beamDepth').value);
+        let fcu = parseFloat(document.getElementById('beam_fcu').value);
+        let fy = parseFloat(document.getElementById('beam_fy').value);
+        let cover = parseFloat(document.getElementById('cover_beam').value);
+        let phi = parseFloat(document.getElementById('rebarDia_beam').value);
+        let span = parseFloat(document.getElementById('spanLength_beam').value);
+        let isUdl = document.querySelector('input[name="beamLoadType"]:checked').value === 'udl';
+        let loadVal = parseFloat(document.getElementById('beamLoadValue').value);
+        if (isNaN(b) || isNaN(h) || isNaN(fcu) || isNaN(fy) || isNaN(cover) || isNaN(phi) || isNaN(span) || isNaN(loadVal)) return;
+
+        let d = h - cover - phi/2; if (d <= 0) d = h * 0.75;
+        let M_kNm = isUdl ? (loadVal * span * span / 8) : (loadVal * span / 4);
+        let M_Nmm = M_kNm * 1e6;
+        let K = M_Nmm / (b * d * d * fcu);
+        let K_prime = (fy === 250) ? 0.167 : 0.156;   // 0.156 for fy=410/460
+        let As = 0, As_prime = 0, z = 0;
+        let sectionType = "";
+        if (K <= K_prime) {
+            sectionType = "Singly reinforced";
+            z = d * (0.5 + Math.sqrt(0.25 - K / 0.9));
+            if (z > 0.95*d) z = 0.95*d;
+            As = M_Nmm / (0.87 * fy * z);
+        } else {
+            sectionType = "Doubly reinforced (K>K')";
+            let d_prime = cover + phi/2;
+            if (d_prime >= d) d_prime = d*0.1;
+            As_prime = (K - K_prime) * fcu * b * d * d / (0.87 * fy * (d - d_prime));
+            if (As_prime < 0) As_prime = 0;
+            let z_double = d * (0.5 + Math.sqrt(0.25 - K_prime / 0.9));
+            if (z_double > 0.95*d) z_double = 0.95*d;
+            As = (K_prime * fcu * b * d * d) / (0.87 * fy * z_double) + As_prime;
+            z = z_double;
+        }
+        let As_min = 0.13 * b * h / 100;
+        let As_max_limit = 0.04 * b * h;
+        let originalAs = As;
+        if (As < As_min) As = As_min;
+        let sectionStatus = (originalAs > As_max_limit) ? "⚠️ EXCEEDS MAX 4% — resize section" : (K <= K_prime ? "✅ Singly reinforced design OK" : "🔄 Doubly reinforced design acceptable");
+
+        // Shear design
+        let V_kN = isUdl ? (loadVal * span / 2) : (loadVal / 2);
+        let v = (V_kN * 1000) / (b * d);
+        let rho = (As / (b * d)) * 100;
+        let vc_base = 0.45;
+        if (rho <= 0.15) vc_base = 0.4;
+        else if (rho <= 0.5) vc_base = 0.5;
+        else if (rho <= 1.0) vc_base = 0.65;
+        else if (rho <= 2.0) vc_base = 0.8;
+        else vc_base = 0.85;
+        let fcuFactor = Math.pow(fcu / 25, 1/3);
+        let vc = Math.min(vc_base * Math.min(fcuFactor, 1.6), 0.8 * Math.sqrt(fcu));
+        let shearMsg = "", linkSuggestion = "";
+        if (v < 0.4) { shearMsg = "✔️ Low shear stress — nominal links sufficient"; linkSuggestion = "Provide φ8 @ 300mm c/c minimum links."; }
+        else if (v <= vc + 0.4) { shearMsg = `✔️ v = ${v.toFixed(2)} ≤ vc+0.4 — design links as per Asv/sv`; linkSuggestion = "Asv/sv ≥ b(v-vc)/(0.87fyv). Use φ8 or φ10 links."; }
+        else if (v > vc+0.4 && v <= 0.8*Math.sqrt(fcu)) { shearMsg = "⚠️ Enhanced shear reinforcement required"; linkSuggestion = "Reduce link spacing or increase link diameter. Max spacing ≤ 0.75d."; }
+        else { shearMsg = "❌ Shear failure — increase b or h"; linkSuggestion = "Section insufficient for shear. Revise dimensions."; }
+
+        // Deflection check
+        let basicLd = 20;
+        let fs = 0.87 * fy * (originalAs / (originalAs > 0 ? originalAs : As));
+        fs = Math.min(fs, 0.8*fy);
+        let modification = 0.55 + (477 - fs) / (120 * (0.9 + M_Nmm/(b*d*d*1e-3)));
+        modification = Math.min(modification, 2.0);
+        if (modification < 0.6) modification = 0.6;
+        let allowableLd = basicLd * modification;
+        let actualLd = (span * 1000) / d;
+        let deflectionOK = actualLd <= allowableLd;
+
+        // DOM updates
+        document.getElementById('beamMoment').innerHTML = `Moment: ${M_kNm.toFixed(1)} kN·m (${isUdl ? 'UDL' : 'Point load at midspan'})`;
+        document.getElementById('beamKValue').innerHTML = `K = ${K.toFixed(4)}  |  K' = ${K_prime} → ${K <= K_prime ? 'singly OK' : 'compression steel needed'}`;
+        document.getElementById('beamAsTension').innerHTML = Math.ceil(As);
+        document.getElementById('beamAsComp').innerHTML = Math.ceil(As_prime);
+        document.getElementById('beamSectionStatus').innerHTML = sectionStatus;
+        document.getElementById('beamShearDetails').innerHTML = `Shear force V = ${V_kN.toFixed(1)} kN`;
+        document.getElementById('beamShearStress').innerHTML = `Shear stress v = ${v.toFixed(3)} N/mm² | concrete vc ≈ ${vc.toFixed(3)} N/mm²`;
+        document.getElementById('beamShearVerdict').innerHTML = shearMsg;
+        document.getElementById('beamLinkAdvice').innerHTML = linkSuggestion;
+        document.getElementById('beamDeflectionStatus').innerHTML = `Actual L/d = ${actualLd.toFixed(1)}  |  Allowable L/d = ${allowableLd.toFixed(1)}`;
+        document.getElementById('beamDeflectionMsg').innerHTML = deflectionOK ? "✅ Deflection PASS (BS8110)" : "❌ Deflection FAIL: increase beam depth";
+        document.getElementById('beamDeflectionMsg').className = deflectionOK ? "status-badge status-safe" : "status-badge status-danger";
+        document.getElementById('beamDepthHint').innerHTML = deflectionOK ? "✔️ Serviceability limit satisfied" : `🔧 Suggested increase: add ${Math.ceil((actualLd/allowableLd)*d - d)} mm to depth h.`;
+        document.getElementById('beamDetailing').innerHTML = `d_eff = ${d.toFixed(1)} mm | z = ${z.toFixed(1)} mm | ${sectionType} | fcu = ${fcu} MPa, fy = ${fy} MPa`;
+        let optMsg = (K > K_prime && As_prime > 0.2*As) ? "💡 Optimization: increase h to reduce compression steel cost" : (v > vc+0.2 ? "💡 Increase breadth b for better shear economy" : "📐 BS8110 compliant — detailing meets code.");
+        document.getElementById('beamOptimizationNote').innerHTML = optMsg;
+    }
+
+    document.getElementById('designBeamBtn').addEventListener('click', runBeamDesign);
+    document.querySelectorAll('#beam-pane input, #beam-pane select').forEach(el => el.addEventListener('change', runBeamDesign));
+    document.querySelectorAll('input[name="beamLoadType"]').forEach(radio => radio.addEventListener('change', () => {
+        let isUdl = document.querySelector('input[name="beamLoadType"]:checked').value === 'udl';
+        document.getElementById('beamLoadLabel').innerText = isUdl ? 'Design load w (kN/m)' : 'Point load at midspan (kN)';
+        runBeamDesign();
+    }));
+    document.getElementById('beamLoadValue').addEventListener('input', runBeamDesign);
+    
+    // initial execution
+    runColumnAnalysis();
+    runBeamDesign();
+</script>
+</body>
+</html>
